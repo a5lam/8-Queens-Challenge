@@ -28,9 +28,9 @@ class NQueens():
         self.board_canvas = Canvas(self.master)
         self.board_canvas.create_text(100, 10, fill="darkblue", font="Times 20 italic bold")
         self.board_canvas.pack()
-
-        lbl = Label(self.board_canvas, compound='center', textvariable=self.sol_var)
-        lbl.pack()
+        #
+        # lbl = Label(self.board_canvas, compound='center', textvariable=self.sol_var)
+        # lbl.pack()
 
         self.controls_frame = ttk.Frame(self.master)
         self.controls_frame.pack(side=TOP, pady=10)
@@ -60,6 +60,19 @@ class NQueens():
                   font='Verdana 10').grid(row=1, column=4, sticky=(W))
         self._solution_callback()
 
+    def _draw_board(self):
+        maxboardsize = min(self.master.winfo_width(), self.master.winfo_height() - 70)
+        cellsize = maxboardsize // self.n
+        self.board_canvas.config(height=self.n*cellsize, width=self.n*cellsize)
+        self.board_canvas.delete('all')
+
+        # color in black board cells
+        for i in range(self.n):
+            for j in range(self.n):
+                if (i+j+self.n) % 2: # black cell
+                    self.board_canvas.create_rectangle(i*cellsize, j*cellsize,
+                                                       i*cellsize+cellsize, j*cellsize+cellsize,
+                                                       fill='black')
 
     def _solution_callback(self):
         try:
@@ -99,6 +112,7 @@ class NQueens():
         self.queens = self.solutions[self.index % len(self.solutions)]
         self.solution_var.set('{0}/{1}'.format(self.index % len(self.solutions) + 1, len(self.solutions)))
         self.index_sol = 'Solution: ' + ', '.join([str(no) for no in self.solutions[self.index]])
+        self._draw_board()
         self.sol_var.set(self.index_sol)
         print(self.sol_var,self.index_sol)
 def main():
