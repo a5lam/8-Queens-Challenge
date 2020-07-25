@@ -6,10 +6,12 @@ from tkinter import ttk, messagebox
 
 
 class NQueens():
-    def __init__(self, master, canvas=None):
-        self.n = 8
-        self.index = 0  # index of currently displayed solution
-        self.solutions = []  # list of all possible solutions for n queens
+
+    def __init__(self, master):
+        self.n = 8 # number of queens
+        self.queens = (0 for i in range(self.n)) # queens in current solution
+        self.index = 0 # index of currently displayed solution
+        self.solutions = [] # list of all possible solutions for n queens
 
         # build gui
         self.master = master
@@ -17,20 +19,15 @@ class NQueens():
         self.master.configure(background='#e1d8b9')
         self.master.minsize(400, 470)
         self.master.resizable(True, True)
+        self.master.bind('<Configure>', lambda e: self._draw_board())
 
         self.style = ttk.Style()
         self.style.configure('TFrame', background='#e1d8b9')
         self.style.configure('TButton', background='#e1d8b9')
         self.style.configure('TLabel', background='#e1d8b9')
 
-        self.sol_var = StringVar()
-        self.sol_var.set('--')
         self.board_canvas = Canvas(self.master)
-        self.board_canvas.create_text(100, 10, fill="darkblue", font="Times 20 italic bold")
         self.board_canvas.pack()
-        #
-        # lbl = Label(self.board_canvas, compound='center', textvariable=self.sol_var)
-        # lbl.pack()
 
         self.controls_frame = ttk.Frame(self.master)
         self.controls_frame.pack(side=TOP, pady=10)
@@ -41,10 +38,9 @@ class NQueens():
         self.n_var.set(self.n)
         Spinbox(self.controls_frame, from_=4, to=99, width=2,
                 font='Verdana 10 bold', textvariable=self.n_var).grid(row=0, column=1)
-        ttk.Button(self.controls_frame, text='Get Next Solution',
+        ttk.Button(self.controls_frame, text = 'Get Next Solution',
                    command=self._solution_callback).grid(row=1, column=0, columnspan=2)
-        ttk.Label(self.controls_frame).grid(row=0, column=2, padx=10)  # spacer
-
+        ttk.Label(self.controls_frame).grid(row=0, column=2, padx=10) # spacer
 
         self.solution_var = StringVar()
         self.time_var = StringVar()
@@ -56,9 +52,10 @@ class NQueens():
                   font='Verdana 10').grid(row=0, column=4, sticky=(W))
         ttk.Label(self.controls_frame, text='Elapsed Time:',
                   font='Verdana 10 bold').grid(row=1, column=3, sticky=(E))
-        ttk.Label(self.controls_frame, textvariable=self.time_var,
+        ttk.Label(self.controls_frame, textvariable = self.time_var,
                   font='Verdana 10').grid(row=1, column=4, sticky=(W))
-        self._solution_callback()
+
+        self._solution_callback() # begin by showing first solution to N queens
 
     def _draw_board(self):
         maxboardsize = min(self.master.winfo_width(), self.master.winfo_height() - 70)
@@ -73,6 +70,9 @@ class NQueens():
                     self.board_canvas.create_rectangle(i*cellsize, j*cellsize,
                                                        i*cellsize+cellsize, j*cellsize+cellsize,
                                                        fill='black')
+            # draw a queen
+            self.board_canvas.create_text(i*cellsize+cellsize//2, self.queens[i]*cellsize+cellsize//2,
+                                          text=u'\u265B', font=('Arial', cellsize//2), fill='orange')
 
     def _solution_callback(self):
         try:
@@ -99,8 +99,8 @@ class NQueens():
                     diag1 = set()
                     diag2 = set()
                     for i in columns:
-                        diag1.add(perm[i] + i)  # checks / diagonal
-                        diag2.add(perm[i] - i)  # checks \ diagonal
+                        diag1.add(perm[i]+i) # checks / diagonal
+                        diag2.add(perm[i]-i) # checks \ diagonal
                     if self.n == len(diag1) == len(diag2):
                         self.solutions.append(perm)
 
@@ -111,13 +111,11 @@ class NQueens():
 
         self.queens = self.solutions[self.index % len(self.solutions)]
         self.solution_var.set('{0}/{1}'.format(self.index % len(self.solutions) + 1, len(self.solutions)))
-        self.index_sol = 'Solution: ' + ', '.join([str(no) for no in self.solutions[self.index]])
         self._draw_board()
-        self.sol_var.set(self.index_sol)
-        print(self.sol_var,self.index_sol)
+
 def main():
     root = Tk()
-    ans = NQueens(root)
+    gui = NQueens(root)
     root.mainloop()
 
-if __name__ == "__main__" : main()
+if __name__ == "__main__": main()
